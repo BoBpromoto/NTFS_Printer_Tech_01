@@ -253,7 +253,7 @@ class Ui_Dialog(object):
                     dir_name = (directory.info.name.name).decode('utf-8')
                     dir_type = "Directory"
                     #dir_EA = directory.info.meta.addr
-                    dir_path = root_path + set_path + ((directory.info.name.name).decode('utf-8'))
+                    dir_path = root_path + set_path + "/" + ((directory.info.name.name).decode('utf-8'))
                     dir_mtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.mtime))
                     dir_atime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.atime))
                     dir_ctime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.crtime))
@@ -277,7 +277,7 @@ class Ui_Dialog(object):
                     file_name = (directory.info.name.name).decode('utf-8')
                     file_type = "File"
                     #file_EA = directory.info.meta.addr
-                    file_path = root_path + set_path + ((directory.info.name.name).decode('utf-8'))
+                    file_path = root_path + set_path + "/" + ((directory.info.name.name).decode('utf-8'))
                     file_mtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.mtime))
                     file_atime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.atime))
                     file_ctime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.crtime))
