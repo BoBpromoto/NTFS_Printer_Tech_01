@@ -34,7 +34,7 @@ class Ui_Dialog(object):
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
         self.label_3 = QtWidgets.QLabel(Dialog)
-        self.label_3.setGeometry(QtCore.QRect(311, 111, 151, 61))
+        self.label_3.setGeometry(QtCore.QRect(315, 112, 221, 61))
         font = QtGui.QFont()
         font.setFamily("Consolas")
         font.setPointSize(10)
@@ -46,7 +46,7 @@ class Ui_Dialog(object):
         self.label_3.setAlignment(QtCore.Qt.AlignCenter)
         self.label_3.setObjectName("label_3")
         self.label_2 = QtWidgets.QLabel(Dialog)
-        self.label_2.setGeometry(QtCore.QRect(319, 23, 261, 61))
+        self.label_2.setGeometry(QtCore.QRect(329, 23, 441, 61))
         font = QtGui.QFont()
         font.setFamily("Consolas")
         font.setPointSize(10)
@@ -61,7 +61,7 @@ class Ui_Dialog(object):
         self.lineEdit_2.setGeometry(QtCore.QRect(340, 170, 471, 31))
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.pushbutton = QtWidgets.QPushButton(Dialog)
-        self.pushbutton.setGeometry(QtCore.QRect(1210, 50, 131, 61))
+        self.pushbutton.setGeometry(QtCore.QRect(1210, 70, 131, 61))
         font = QtGui.QFont()
         font.setFamily("Consolas")
         font.setPointSize(10)
@@ -82,7 +82,7 @@ class Ui_Dialog(object):
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
         self.label_4.setObjectName("label_4")
         self.pushbutton_2 = QtWidgets.QPushButton(Dialog)
-        self.pushbutton_2.setGeometry(QtCore.QRect(1210, 140, 131, 61))
+        self.pushbutton_2.setGeometry(QtCore.QRect(1210, 150, 131, 61))
         font = QtGui.QFont()
         font.setFamily("Consolas")
         font.setPointSize(10)
@@ -115,7 +115,7 @@ class Ui_Dialog(object):
         self.label_6.setAlignment(QtCore.Qt.AlignCenter)
         self.label_6.setObjectName("label_6")
         self.tableWidget = QtWidgets.QTableWidget(Dialog)
-        self.tableWidget.setGeometry(QtCore.QRect(32, 84, 251, 111))
+        self.tableWidget.setGeometry(QtCore.QRect(33, 80, 221, 94))
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
@@ -153,13 +153,14 @@ class Ui_Dialog(object):
         QtCore.QMetaObject.connectSlotsByName(Dialog)
         self.pushbutton_3.clicked.connect(self.maplogicphysic)
         self.pushbutton.clicked.connect(self.start)
+        self.pushbutton_2.clicked.connect(self.makehtml)
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
         self.label.setText(_translate("Dialog", "System Drive state"))
-        self.label_3.setText(_translate("Dialog", "Input_Path"))
-        self.label_2.setText(_translate("Dialog", "Input Physical Drive Name"))
+        self.label_3.setText(_translate("Dialog", "Input_Path (ex : /)"))
+        self.label_2.setText(_translate("Dialog", "Input Physical Drive Name (ex : PhysicalDrive0)"))
         self.pushbutton.setText(_translate("Dialog", "Search"))
         self.label_4.setText(_translate("Dialog", "Dir & File List"))
         self.pushbutton_2.setText(_translate("Dialog", "Show html"))
@@ -249,7 +250,7 @@ class Ui_Dialog(object):
             self.find_directory(vbr_offset)
 
     def find_directory(self, vbr_offset) :
-        global in_path_list
+        global in_path_list, set_path
         fs = pytsk3.FS_Info(Volume_img, offset = vbr_offset)
         # while True : 
         in_path_list = list()
@@ -338,6 +339,43 @@ class Ui_Dialog(object):
     def table_column_sort(self, p_row) :
         self.tableWidget_2.setSortingEnabled(True)
         self.tableWidget_2.setSortingEnabled(False)
+
+    # def cellClick(self, p_row, p_col) :
+    #     global new_path
+    #     set_clicked_path = self.tableWidget_2.item(p_row, p_col)
+    #     if cell is not None :
+    #         now_path = cell.text()
+    #     else :
+    #         pass
+
+    #     self.find_directory()
+
+
+    def makehtml(self) :
+        filename = root_path.replace(':','_') + set_path.replace('/','_') + ".html"
+        print (filename)
+        htmlfile = open(filename, 'w')
+        head_string = '<!DOCTYPE html><html><head><meta charset="UTF-8"></meta><title>NTFS Printer</title><link href="http://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css"><link href="style2.css" rel="stylesheet"></head>'
+        body_string = '<body><div class="window_header"><h2>NTFS Analysis</h2><p>Best Of the Best 6th Digital Forensic</p></div><div class="clickclick">'
+        body_t_string = '<table style="width:100%"><tr><th>Number</th><th>Type</th><th>Name</th><th>Size</th><th>Path</th><th>Modified Time</th><th>Access Time</th><th>Create Time</th><th>Entry_Change Time</th></tr>'
+        init_string = head_string + body_string + body_t_string
+        htmlfile.write(init_string)
+        body_tb_string = " "
+        for h_row in range(0, len(in_path_list)) :
+            body_tb_string += "\n<tr>\n<td>" + str(h_row+1) + "</td>\n"
+            for h_col in range(0,8) :
+                if h_col == 1 or h_col == 3 :
+                    body_tb_string += "\t<td>" + in_path_list[h_row][h_col] + "</td>\n"
+                    print (in_path_list[h_row][h_col])
+                else :
+                    body_tb_string += "\t<td>" + in_path_list[h_row][h_col] + "</td>\n"
+            body_tb_string += "</tr>\n"
+        body_tb_string += "</table>"
+
+        footer_string = '<div class="window_footer" style="padding-top: 10px;height: 53.2px;"><a><span>@Author : L3ad0xFF</span> (Moonwon LEE)<br></a><p style="margin-top:5px;"><a href = "https://github.com/BoBpromoto/NTFS_Printer_Tech_01">https://github.com/BoBpromoto/NTFS_Printer_Tech_01</a></p><br></div></body></html>'
+        htmlfile.write(body_tb_string)
+        htmlfile.write(footer_string)
+        htmlfile.close()
 
 if __name__ == "__main__":
     import sys
