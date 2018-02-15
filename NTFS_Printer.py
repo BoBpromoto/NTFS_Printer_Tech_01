@@ -341,7 +341,7 @@ class Ui_Dialog(object):
         filename = time_info + ".html"
         print (filename)
         htmlfile = open(filename, 'w')
-        head_string = '<!DOCTYPE html><html><head><meta charset="UTF-8"></meta><title>NTFS Printer</title><link href="http://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css"><link href="style2.css" rel="stylesheet"></head>'
+        head_string = '<!DOCTYPE html><html><head><meta charset="euc-kr"></meta><title>NTFS Printer</title><link href="http://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css"><link href="style2.css" rel="stylesheet"></head>'
         body_string = '<body><div class="window_header"><h2>NTFS Analysis</h2><p>Best Of the Best 6th Digital Forensic</p></div><div class="clickclick">'
         body_t_string = '<table style="width:100%"><tr><th>Number</th><th>Type</th><th>Name</th><th>Size</th><th>Path</th><th>Modified Time</th><th>Access Time</th><th>Create Time</th><th>Entry_Change Time</th></tr>'
         init_string = head_string + body_string + body_t_string
