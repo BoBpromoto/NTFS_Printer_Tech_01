@@ -36,7 +36,7 @@ class Ui_Dialog(object):
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
         self.label_3 = QtWidgets.QLabel(Dialog)
-        self.label_3.setGeometry(QtCore.QRect(315, 112, 221, 61))
+        self.label_3.setGeometry(QtCore.QRect(315, 112, 281, 61))
         font = QtGui.QFont()
         font.setFamily("Consolas")
         font.setPointSize(10)
@@ -161,7 +161,7 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
         self.label.setText(_translate("Dialog", "System Drive state"))
-        self.label_3.setText(_translate("Dialog", "Input_Path (ex : /)"))
+        self.label_3.setText(_translate("Dialog", "Input_Path (ex : /, /BoB/)"))
         self.label_2.setText(_translate("Dialog", "Input Physical Drive Name (ex : PhysicalDrive0)"))
         self.pushbutton.setText(_translate("Dialog", "Search"))
         self.label_4.setText(_translate("Dialog", "Dir & File List"))
@@ -238,7 +238,7 @@ class Ui_Dialog(object):
         return ntfs_list
 
     def start(self) :
-        global disk, Volume_img, root_path
+        global disk, Volume_img, root_path, vbr_offset, vbr_offset
         drive_cap = self.lineEdit.text()
         root_path = phylogset[drive_cap]
         set_Volume        = "\\\\.\\"+drive_cap
@@ -252,13 +252,13 @@ class Ui_Dialog(object):
             self.find_directory(vbr_offset)
 
     def find_directory(self, vbr_offset) :
-        global in_path_list, set_path
+        global in_path_list, set_path, fs
         fs = pytsk3.FS_Info(Volume_img, offset = vbr_offset)
         # while True : 
+        set_path = self.lineEdit_2.text()
         in_path_list = list()
         # print ("\nInput Path for Search (ex. /) ")
         # set_path = input("  => If you Want Quit, Input the 'q' or 'Q' : ")
-        set_path = self.lineEdit_2.text()
 
         # if (set_path == 'q') or (set_path == 'Q') :
         #     break
@@ -275,7 +275,7 @@ class Ui_Dialog(object):
                     dir_name = (directory.info.name.name).decode('utf-8')
                     dir_type = "Directory"
                     #dir_EA = directory.info.meta.addr
-                    dir_path = root_path + set_path + "/" + ((directory.info.name.name).decode('utf-8'))
+                    dir_path = root_path + set_path + ((directory.info.name.name).decode('utf-8'))
                     dir_mtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.mtime))
                     dir_atime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.atime))
                     dir_ctime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.crtime))
@@ -299,7 +299,175 @@ class Ui_Dialog(object):
                     file_name = (directory.info.name.name).decode('utf-8')
                     file_type = "File"
                     #file_EA = directory.info.meta.addr
-                    file_path = root_path + set_path + "/" + ((directory.info.name.name).decode('utf-8'))
+                    file_path = root_path + set_path + ((directory.info.name.name).decode('utf-8'))
+                    file_mtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.mtime))
+                    file_atime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.atime))
+                    file_ctime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.crtime))
+                    file_ectime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.ctime))
+                    file_size = str(directory.info.meta.size) + " Bytes"
+                    #count += 1
+                    file_list = [file_type, file_name, file_size, file_path, file_mtime, file_atime, file_ctime, file_ectime]
+                    in_path_list.append(file_list)
+
+                    # print ("\n[+] File : %s" % file_name)
+                    # #print ("\t[-] File Entry Address : %d" % file_EA)
+                    # print ("\t[-] Path : %s" % file_path)
+                    # print ("\t[-] File modification_time : %s" % file_mtime)
+                    # print ("\t[-] File access_time : %s" % file_atime)
+                    # print ("\t[-] File create_time : %s" % file_ctime)
+                    # print ("\t[-] File entry_change_time : %s" % file_ectime)
+                    # print ("\t[-] File Size : %d Bytes" % file_size)
+            except :
+                pass
+
+        line_num = len(in_path_list)
+        self.tableWidget_2.setRowCount(line_num)
+        self.tableWidget_2.setColumnCount(8)
+        self.tableWidget_2.setHorizontalHeaderLabels(["Type", "Name", "Size", "Path", 
+            "Modified time", "Access time", "Create time", "EntryChange time"])
+
+        for p_row in range(0, len(in_path_list)) :
+            for p_col in range(0, 8) :
+                item = QTableWidgetItem(in_path_list[p_row][p_col])
+                self.tableWidget_2.setItem(p_row, p_col, item)
+
+        self.tableWidget_2.setSortingEnabled(False)
+        t_column = self.tableWidget_2.horizontalHeader()
+        t_column.sectionClicked.connect(self.table_column_sort)
+
+        self.tableWidget_2.cellClicked.connect(self.cell_was_clicked)
+
+        # self.tableWidget_2.resizeRowsToContents()
+        self.tableWidget_2.setColumnWidth(0, 100)
+        self.tableWidget_2.setColumnWidth(1, 170)
+        #self.tableWidget_2.setColumnWidth(2, 150)
+        self.tableWidget_2.setColumnWidth(3, 250)
+        self.tableWidget_2.setColumnWidth(4, 150)
+        self.tableWidget_2.setColumnWidth(5, 150)
+        self.tableWidget_2.setColumnWidth(6, 150)
+        self.tableWidget_2.setColumnWidth(7, 150)
+
+        
+
+    def table_column_sort(self, p_row) :
+        self.tableWidget_2.setSortingEnabled(True)
+        self.tableWidget_2.setSortingEnabled(False)
+
+    # def cellClick(self, p_row, p_col) :
+    #     global new_path
+    #     set_clicked_path = self.tableWidget_2.item(p_row, p_col)
+    #     if cell is not None :
+    #         now_path = cell.text()
+    #     else :
+    #         pass
+
+    #     self.find_directory()
+
+
+    def makehtml(self) :
+        now_date = time.strftime("%Y-%m-%d", localtime())
+        now_time = time.strftime("%H_%M_%S", localtime())
+        set_loctime = now_date + " " + now_time
+        time_info = "Local time_" + set_loctime
+        filename = time_info + ".html"
+        print (filename)
+        htmlfile = open(filename, 'w')
+        head_string = '<!DOCTYPE html><html><head><meta charset="UTF-8"></meta><title>NTFS Printer</title><link href="http://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css"><link href="style2.css" rel="stylesheet"></head>'
+        body_string = '<body><div class="window_header"><h2>NTFS Analysis</h2><p>Best Of the Best 6th Digital Forensic</p></div><div class="clickclick">'
+        body_t_string = '<table style="width:100%"><tr><th>Number</th><th>Type</th><th>Name</th><th>Size</th><th>Path</th><th>Modified Time</th><th>Access Time</th><th>Create Time</th><th>Entry_Change Time</th></tr>'
+        init_string = head_string + body_string + body_t_string
+        htmlfile.write(init_string)
+        body_tb_string = " "
+        for h_row in range(0, len(in_path_list)) :
+            body_tb_string += "\n<tr>\n<td>" + str(h_row+1) + "</td>\n"
+            for h_col in range(0,8) :
+                if h_col == 1 or h_col == 3 :
+                    body_tb_string += "\t<td>" + in_path_list[h_row][h_col] + "</td>\n"
+                    #print (in_path_list[h_row][h_col])
+                else :
+                    body_tb_string += "\t<td>" + in_path_list[h_row][h_col] + "</td>\n"
+            body_tb_string += "</tr>\n"
+        body_tb_string += "</table>"
+
+        footer_string = '<div class="window_footer" style="padding-top: 10px;height: 53.2px;"><a><span>@Author : L3ad0xFF</span> (Moonwon LEE)<br></a><p style="margin-top:5px;"><a href = "https://github.com/BoBpromoto/NTFS_Printer_Tech_01">https://github.com/BoBpromoto/NTFS_Printer_Tech_01</a></p><br></div></body></html>'
+        htmlfile.write(body_tb_string)
+        htmlfile.write(footer_string)
+        htmlfile.close()
+
+        self.msgboxprint()
+
+    def msgboxprint(self) : 
+        save_path = os.getcwd()
+        now_date = time.strftime("%Y-%m-%d", localtime())
+        now_time = time.strftime("%H:%M:%S", localtime())
+        set_loctime = now_date + " " + now_time
+        time_info = "Local time = " + set_loctime
+        infoBox = QMessageBox() 
+        infoBox.setIcon(QMessageBox.Information)
+        infoBox.setText("Extract HTML File Success!")
+        infoBox.setInformativeText("Save Path = " + save_path)
+        infoBox.setWindowTitle("Window Title")
+        infoBox.setDetailedText(time_info)
+        infoBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        infoBox.setEscapeButton(QMessageBox.Close)
+        infoBox.exec_()
+
+    def cell_was_clicked(self, row, column):
+        global next_path
+        next_path = ""
+        for com_row in range (0, len(in_path_list)) :
+            for com_col in range (0, 8) :
+                if (com_row == row) and (com_col == column) :
+                    if self.tableWidget_2.item(row, 0).text() == "Directory" :
+                        next_path_str = self.tableWidget_2.item(row, 3).text()
+                        next_path = next_path_str[2:] +'/'
+                        print ("sel : " + next_path_str)
+                        print (next_path)
+                    else :
+                        print ("Not Directory")
+
+        self.clickeddir()
+        return "clicked"
+
+    def clickeddir(self) :
+        directorys = fs.open_dir(path = next_path)
+        # count = 0
+        in_path_list = list()
+        for directory in directorys :
+            if ((directory.info.name.name).decode('utf-8') == '.') or ((directory.info.name.name).decode('utf-8') == '..') :
+                continue
+
+            try :
+                if directory.info.meta.type == pytsk3.TSK_FS_META_TYPE_DIR :
+                    dir_list = list()
+                    dir_name = (directory.info.name.name).decode('utf-8')
+                    dir_type = "Directory"
+                    #dir_EA = directory.info.meta.addr
+                    dir_path = root_path + next_path + ((directory.info.name.name).decode('utf-8'))
+                    dir_mtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.mtime))
+                    dir_atime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.atime))
+                    dir_ctime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.crtime))
+                    dir_ectime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.ctime))
+                    dir_size = str(directory.info.meta.size) + " Bytes"
+                    #count += 1
+                    dir_list = [dir_type, dir_name, dir_size, dir_path, dir_mtime, dir_atime, dir_ctime, dir_ectime]
+                    in_path_list.append(dir_list)
+
+                    # print ("\n[+] Dir : %s" % dir_name)
+                    # #print ("\t[-] Dir Entry Address : %d" % dir_EA)
+                    # print ("\t[-] Path : %s" % dir_path)
+                    # print ("\t[-] Dir modification_time : %s" % dir_mtime)
+                    # print ("\t[-] Dir access_time : %s" % dir_atime)
+                    # print ("\t[-] Dir create_time : %s" % dir_ctime)
+                    # print ("\t[-] Dir entry_change_time : %s" % dir_ectime)
+                    # print ("\t[-] Dir Size :  % d " % dir_size)
+
+                else:
+                    file_list = list()
+                    file_name = (directory.info.name.name).decode('utf-8')
+                    file_type = "File"
+                    #file_EA = directory.info.meta.addr
+                    file_path = root_path + next_path + ((directory.info.name.name).decode('utf-8'))
                     file_mtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.mtime))
                     file_atime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.atime))
                     file_ctime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(directory.info.meta.crtime))
@@ -345,63 +513,11 @@ class Ui_Dialog(object):
         self.tableWidget_2.setColumnWidth(6, 150)
         self.tableWidget_2.setColumnWidth(7, 150)
 
+        self.tableWidget_2.cellClicked.connect(self.cell_was_clicked)
+
     def table_column_sort(self, p_row) :
         self.tableWidget_2.setSortingEnabled(True)
         self.tableWidget_2.setSortingEnabled(False)
-
-    # def cellClick(self, p_row, p_col) :
-    #     global new_path
-    #     set_clicked_path = self.tableWidget_2.item(p_row, p_col)
-    #     if cell is not None :
-    #         now_path = cell.text()
-    #     else :
-    #         pass
-
-    #     self.find_directory()
-
-
-    def makehtml(self) :
-        filename = root_path.replace(':','_') + set_path.replace('/','_') + ".html"
-        print (filename)
-        htmlfile = open(filename, 'w')
-        head_string = '<!DOCTYPE html><html><head><meta charset="UTF-8"></meta><title>NTFS Printer</title><link href="http://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css"><link href="style2.css" rel="stylesheet"></head>'
-        body_string = '<body><div class="window_header"><h2>NTFS Analysis</h2><p>Best Of the Best 6th Digital Forensic</p></div><div class="clickclick">'
-        body_t_string = '<table style="width:100%"><tr><th>Number</th><th>Type</th><th>Name</th><th>Size</th><th>Path</th><th>Modified Time</th><th>Access Time</th><th>Create Time</th><th>Entry_Change Time</th></tr>'
-        init_string = head_string + body_string + body_t_string
-        htmlfile.write(init_string)
-        body_tb_string = " "
-        for h_row in range(0, len(in_path_list)) :
-            body_tb_string += "\n<tr>\n<td>" + str(h_row+1) + "</td>\n"
-            for h_col in range(0,8) :
-                if h_col == 1 or h_col == 3 :
-                    body_tb_string += "\t<td>" + in_path_list[h_row][h_col] + "</td>\n"
-                    #print (in_path_list[h_row][h_col])
-                else :
-                    body_tb_string += "\t<td>" + in_path_list[h_row][h_col] + "</td>\n"
-            body_tb_string += "</tr>\n"
-        body_tb_string += "</table>"
-
-        footer_string = '<div class="window_footer" style="padding-top: 10px;height: 53.2px;"><a><span>@Author : L3ad0xFF</span> (Moonwon LEE)<br></a><p style="margin-top:5px;"><a href = "https://github.com/BoBpromoto/NTFS_Printer_Tech_01">https://github.com/BoBpromoto/NTFS_Printer_Tech_01</a></p><br></div></body></html>'
-        htmlfile.write(body_tb_string)
-        htmlfile.write(footer_string)
-        htmlfile.close()
-
-        self.msgboxprint()
-
-    def msgboxprint(self) : 
-        save_path = os.getcwd()
-        now_date = time.strftime("%Y-%m-%d", localtime())
-        now_time = time.strftime("%H:%M:%S", localtime())
-        set_loctime = now_date + " " + now_time
-        infoBox = QMessageBox() 
-        infoBox.setIcon(QMessageBox.Information)
-        infoBox.setText("Extract HTML File Success!")
-        infoBox.setInformativeText("Save Path = " + save_path)
-        infoBox.setWindowTitle("Window Title")
-        infoBox.setDetailedText(set_loctime)
-        infoBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-        infoBox.setEscapeButton(QMessageBox.Close)
-        infoBox.exec_()
 
 
 if __name__ == "__main__":
