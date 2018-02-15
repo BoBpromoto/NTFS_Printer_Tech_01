@@ -1,3 +1,4 @@
+# !/usr/bin/python
 # -*- coding: utf-8 -*-
 # -*- coding: cp949 -*-
 
@@ -12,6 +13,7 @@ import os
 from struct import *
 import datetime
 import time
+from time import gmtime, localtime, strftime
 import wmi
 
 class Ui_Dialog(object):
@@ -334,7 +336,14 @@ class Ui_Dialog(object):
         t_column.sectionClicked.connect(self.table_column_sort)
 
         # self.tableWidget_2.resizeRowsToContents()
-        # self.tableWidget_2.resizeColumnsToContents(2)
+        self.tableWidget_2.setColumnWidth(0, 100)
+        self.tableWidget_2.setColumnWidth(1, 170)
+        #self.tableWidget_2.setColumnWidth(2, 150)
+        self.tableWidget_2.setColumnWidth(3, 250)
+        self.tableWidget_2.setColumnWidth(4, 150)
+        self.tableWidget_2.setColumnWidth(5, 150)
+        self.tableWidget_2.setColumnWidth(6, 150)
+        self.tableWidget_2.setColumnWidth(7, 150)
 
     def table_column_sort(self, p_row) :
         self.tableWidget_2.setSortingEnabled(True)
@@ -366,7 +375,7 @@ class Ui_Dialog(object):
             for h_col in range(0,8) :
                 if h_col == 1 or h_col == 3 :
                     body_tb_string += "\t<td>" + in_path_list[h_row][h_col] + "</td>\n"
-                    print (in_path_list[h_row][h_col])
+                    #print (in_path_list[h_row][h_col])
                 else :
                     body_tb_string += "\t<td>" + in_path_list[h_row][h_col] + "</td>\n"
             body_tb_string += "</tr>\n"
@@ -376,6 +385,24 @@ class Ui_Dialog(object):
         htmlfile.write(body_tb_string)
         htmlfile.write(footer_string)
         htmlfile.close()
+
+        self.msgboxprint()
+
+    def msgboxprint(self) : 
+        save_path = os.getcwd()
+        now_date = time.strftime("%Y-%m-%d", localtime())
+        now_time = time.strftime("%H:%M:%S", localtime())
+        set_loctime = now_date + " " + now_time
+        infoBox = QMessageBox() 
+        infoBox.setIcon(QMessageBox.Information)
+        infoBox.setText("Extract HTML File Success!")
+        infoBox.setInformativeText("Save Path = " + save_path)
+        infoBox.setWindowTitle("Window Title")
+        infoBox.setDetailedText(set_loctime)
+        infoBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        infoBox.setEscapeButton(QMessageBox.Close)
+        infoBox.exec_()
+
 
 if __name__ == "__main__":
     import sys
