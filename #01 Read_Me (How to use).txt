@@ -3,7 +3,7 @@
 		||							     ||
 		||	    Category : Tech 	      No. 01		     ||	
 		||							     ||
-		||		@Author : L3ad0xff (Lee Moonwon)	     ||
+		||		     @Author : L3ad0xff 		     ||
 		||							     ||
 		||	      	   NTFS File System Parser		     ||
 		||	          Folder Sturcture Analysis		     ||
